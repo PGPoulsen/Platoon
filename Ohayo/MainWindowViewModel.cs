@@ -8,25 +8,32 @@ using Karambolo.PO;
 using System.IO;
 using System.Collections.Specialized;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Collections;
 
 namespace Ohayo
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private HashSet<POKey> _keys = new();
         private ICollection<POCatalog> _catalogs = new List<POCatalog>();
+        private PoEntryRow _selectedRow;
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
         public ObservableCollection<PoEntryRow> Rows { get; } = new();
         public ICollection<string> Languages => _catalogs.Select(x => x.Language).ToList();
 
+        public PoEntryRow SelectedRow
+        {
+            get => _selectedRow;
+            set
+            {
+                _selectedRow = value;
+                PropertyChanged(this, new PropertyChangedEventArgs(nameof(SelectedRow)));
+            }
+        }
+
         public event EventHandler<LanguageChangeEventArgs> LanguageChanged = delegate { };
 
         public MainWindowViewModel()
         {
-            //   AddPoFile();
         }
 
 
@@ -47,25 +54,15 @@ namespace Ohayo
             PropertyChanged(this, new PropertyChangedEventArgs(nameof(Languages)));
             foreach (var entry in result.Catalog)
             {
-                var addedKey = _keys.Add(entry.Key);
-                if (addedKey)
+                if (entry.Key.Id == "Cancel Checklist Task")
                 {
-                    foreach (var e in entry)
-                    {
 
-                    }
-                    if (entry.Key.Id == "Cancel Checklist Task")
-                    {
-
-                    }
                 }
+
                 var row = Rows.SingleOrDefault(x => x.Key.Equals(entry.Key));
                 if (row is null)
                 {
-                    row = new PoEntryRow
-                    {
-                        Key = entry.Key
-                    };
+                    row = new PoEntryRow(entry.Key, filePath);
                     Rows.Add(row);
                 }
                 row.LanguageToEntry[result.Catalog.Language] = entry;
@@ -95,10 +92,9 @@ namespace Ohayo
                 if (row is not null)
                 {
                     row.LanguageToEntry.Remove(language);
-                    if (row.LanguageToEntry is null || row.LanguageToEntry.Count == 0)
+                    if (row.LanguageToEntry.Count == 0)
                     {
                         Rows.Remove(row);
-                        _keys.Remove(key);
                     }
                 }
             }
@@ -118,96 +114,6 @@ namespace Ohayo
         //    {
         //    }
         //}
-    }
-
-    public class PoEntryRow : IDictionary<string, string>
-    {
-        public POKey Key { get; set; }
-        public string Context => Key.ContextId;
-        public string MessageId => Key.Id;
-        public Dictionary<string, IPOEntry> LanguageToEntry { get; set; } = new();
-
-        public ICollection<string> Keys => LanguageToEntry.Keys;
-
-        public ICollection<string> Values => LanguageToEntry.Values.Select(x => x[0]).ToList();
-
-        public int Count => LanguageToEntry.Count();
-
-        public bool IsReadOnly => true;
-
-        public string this[string key]
-        {
-            get
-            {
-                if(LanguageToEntry.TryGetValue(key, out var value))
-                {
-                    return value[0];
-                }
-                return null;
-            }
-            set => throw new NotImplementedException();
-        }
-
-        public void Add(string key, string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool ContainsKey(string key)
-        {
-            return LanguageToEntry.ContainsKey(key);
-        }
-
-        public bool Remove(string key)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryGetValue(string key, [MaybeNullWhen(false)] out string value)
-        {
-            if (LanguageToEntry.TryGetValue(key, out var entry))
-            {
-                value = entry[0];
-                return true; ;
-            }
-            value = null;
-            return false;
-        }
-
-        public void Add(KeyValuePair<string, string> item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Clear()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Contains(KeyValuePair<string, string> item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Remove(KeyValuePair<string, string> item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
     }
 
 

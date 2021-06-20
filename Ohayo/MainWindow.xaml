@@ -54,25 +54,33 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </GroupBox>
-                <GroupBox Header="Properties" Grid.Row="1">
-
-                </GroupBox>
             </Grid>
+            <GroupBox Header="Properties" DockPanel.Dock="Bottom">
+                <ListView ItemsSource="{Binding Path=SelectedRow.SourceEntries}"/>
+            </GroupBox>
 
             <DataGrid ItemsSource="{Binding Rows}" 
                       x:Name="LanguageGrid"
                       AutoGenerateColumns="False" IsReadOnly="True" 
                       ScrollViewer.CanContentScroll="True"                   
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      SelectedItem="{Binding SelectedRow}"
+                      >
                 <DataGrid.Resources>
-                    <Style TargetType="DataGridTextColumn">
-                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                    <Style TargetType="TextBlock" x:Key="WrapTextBlock">
+                        <Setter Property="TextWrapping" Value="Wrap" />
                     </Style>
                 </DataGrid.Resources>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Change Context Id" Click="ChangeContextId" />
+                        <MenuItem Header="Change Message Id" Click="ChangeMessageId" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Context" Binding="{Binding Context}" Width="300"/>
-                    <DataGridTextColumn Header="MessageId" Binding="{Binding MessageId}"  Width="300"/>
+                    <DataGridTextColumn Header="Context" Binding="{Binding Context}" Width="300" ElementStyle="{StaticResource WrapTextBlock}"/>
+                    <DataGridTextColumn Header="MessageId" Binding="{Binding MessageId}"  Width="300"  ElementStyle="{StaticResource WrapTextBlock}"/>
                 </DataGrid.Columns>
 
             </DataGrid>
